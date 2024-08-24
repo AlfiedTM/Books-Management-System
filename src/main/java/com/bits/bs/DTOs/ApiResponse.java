@@ -1,5 +1,8 @@
 package com.bits.bs.DTOs;
 
+import lombok.Data;
+
+@Data
 public class ApiResponse <T> {
     //    Status code
     private int code;

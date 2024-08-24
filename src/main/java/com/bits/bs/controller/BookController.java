@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,7 +21,7 @@ public class BookController {
      * Fetch all books
      * */
     @GetMapping("/books")
-    private ResponseEntity<ApiResponse<List<Book>>> getAllBooks() {
+    public ResponseEntity<ApiResponse<List<Book>>> getAllBooks() {
         List<Book> books;
         ApiResponse<List<Book>> response;
         try{
@@ -39,7 +38,7 @@ public class BookController {
      * @param bookDto
      * */
     @PostMapping("/books")
-    private ResponseEntity<ApiResponse<Book>> addNewBook(@RequestBody BookDto bookDto) {
+    public ResponseEntity<ApiResponse<Book>> addNewBook(@RequestBody BookDto bookDto) {
         ApiResponse<Book> response;
         try{
             Book newBook = bookDto.mapDtoToBook();
@@ -57,7 +56,7 @@ public class BookController {
     /*Fetch a particular book by id
     * */
     @GetMapping("/books/{id}")
-    private ResponseEntity<ApiResponse<Book>> GetBookById(@PathVariable long id) {
+    public ResponseEntity<ApiResponse<Book>> GetBookById(@PathVariable long id) {
         ApiResponse<Book> response;
         try{
             Book newBook = bookService.getBookById(id);
@@ -74,7 +73,7 @@ public class BookController {
     /*Delete a particular book by id
     * */
     @DeleteMapping("/books/{id}")
-    private ResponseEntity<ApiResponse<String>> DeleteBookById(@PathVariable long id) {
+    public ResponseEntity<ApiResponse<String>> DeleteBookById(@PathVariable long id) {
         ApiResponse<String> response;
         try{
            bookService.deleteBookById(id);
@@ -91,7 +90,7 @@ public class BookController {
     /*Update a particular book
     * */
     @PutMapping("/books")
-    private ResponseEntity<ApiResponse<Book>> DeleteBookById(@RequestBody BookDto bookDto) {
+    public ResponseEntity<ApiResponse<Book>> DeleteBookById(@RequestBody BookDto bookDto) {
         ApiResponse<Book> response;
         try{
             Book newBook = bookDto.mapDtoToBook();

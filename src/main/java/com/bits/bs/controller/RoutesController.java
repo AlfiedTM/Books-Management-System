@@ -15,7 +15,7 @@ public class RoutesController {
     }
 
 //
-    @GetMapping("/books/new")
+    @GetMapping("/new")
     public String booksForm() {
         return "books/create";
     }
