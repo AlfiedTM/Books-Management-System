@@ -37,7 +37,7 @@ public interface BookService {
      * Delete Books by id
      * @param id
      * */
-    void deleteBookById(long id);
+    boolean deleteBookById(long id);
 
 
     /**

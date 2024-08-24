@@ -22,15 +22,15 @@ public class BookController {
      * */
     @GetMapping("/books")
     public ResponseEntity<ApiResponse<List<Book>>> getAllBooks() {
-        List<Book> books;
         ApiResponse<List<Book>> response;
         try{
-            books = bookService.getAllBooks();
+            List<Book> books = bookService.getAllBooks();
             response = new ApiResponse<>(HttpStatus.OK.value(), "Successful", books, true);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception e){
             response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -40,72 +40,102 @@ public class BookController {
     @PostMapping("/books")
     public ResponseEntity<ApiResponse<Book>> addNewBook(@RequestBody BookDto bookDto) {
         ApiResponse<Book> response;
-        try{
+        try {
+            // Map DTO to Book entity
             Book newBook = bookDto.mapDtoToBook();
 
-            response = new ApiResponse<>(HttpStatus.OK.value(),
-                    "Successful",
-                    bookService.save(newBook),
-                    true);
-        }catch (Exception e){
-            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, false);
+            // Save the new book using the service
+            Book savedBook = bookService.save(newBook);
+
+            response = new ApiResponse<>(HttpStatus.CREATED.value(), "Book created successfully", savedBook, true);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            // Handle general exceptions
+            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred: " + e.getMessage(), null, false);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     /*Fetch a particular book by id
     * */
     @GetMapping("/books/{id}")
-    public ResponseEntity<ApiResponse<Book>> GetBookById(@PathVariable long id) {
+    public ResponseEntity<ApiResponse<Book>> getBookById(@PathVariable long id) {
         ApiResponse<Book> response;
-        try{
-            Book newBook = bookService.getBookById(id);
-            response = new ApiResponse<>(HttpStatus.OK.value(),
-                    "Successful",
-                    newBook,
-                    true);
-        }catch (Exception e){
-            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, false);
+        try {
+            // Attempt to retrieve the book by ID
+            Book book = bookService.getBookById(id);
+
+            if (book == null) {
+                // If no book is found, return 404 Not Found
+                response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "Book not found", null, false);
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            // If book is found, return 200 OK
+            response = new ApiResponse<>(HttpStatus.OK.value(), "Successful", book, true);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            // Handle unexpected errors
+            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred: " + e.getMessage(), null, false);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /*Delete a particular book by id
     * */
     @DeleteMapping("/books/{id}")
-    public ResponseEntity<ApiResponse<String>> DeleteBookById(@PathVariable long id) {
+    public ResponseEntity<ApiResponse<String>> deleteBookById(@PathVariable long id) {
         ApiResponse<String> response;
-        try{
-           bookService.deleteBookById(id);
-            response = new ApiResponse<>(HttpStatus.OK.value(),
-                    "Successful",
-                    "Successful",
-                    true);
-        }catch (Exception e){
-            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, false);
+        try {
+            boolean isDeleted = bookService.deleteBookById(id);
+
+            if (!isDeleted) {
+                // If no book is found to delete, return 404 Not Found
+                response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "Book not found", null, false);
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            // If the book is successfully deleted, return 204 No Content
+            response = new ApiResponse<>(HttpStatus.NO_CONTENT.value(), "Book successfully deleted", null, true);
+            return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            // Handle unexpected errors
+            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred: " + e.getMessage(), null, false);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     /*Update a particular book
     * */
     @PutMapping("/books")
-    public ResponseEntity<ApiResponse<Book>> DeleteBookById(@RequestBody BookDto bookDto) {
+    public ResponseEntity<ApiResponse<Book>> updateBook(@RequestBody Book book) {
         ApiResponse<Book> response;
-        try{
-            Book newBook = bookDto.mapDtoToBook();
-            Book book = bookService.getBookById(newBook.getId());
-            if(book != null){
-                response = new ApiResponse<>(HttpStatus.OK.value(),
-                        "Successful",
-                        bookService.save(newBook),
-                        true);
-            }else {
-                response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Invalid book details", null, false);
+        try {
+
+            // Check if the book exists
+            Book existingBook = bookService.getBookById(book.getId());
+
+            if (existingBook != null) {
+                // Update the book
+                Book savedBook = bookService.save(book);
+                response = new ApiResponse<>(HttpStatus.OK.value(), "Book updated successfully", savedBook, true);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                // Book not found
+                response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "Book not found", null, false);
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
             }
-        }catch (Exception e){
-            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, false);
+
+        } catch (Exception e) {
+            // Handle unexpected errors
+            response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred: " + e.getMessage(), null, false);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

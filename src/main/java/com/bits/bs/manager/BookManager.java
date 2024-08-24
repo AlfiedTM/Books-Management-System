@@ -34,8 +34,14 @@ public class BookManager implements BookService {
     }
 
     @Override
-    public void deleteBookById(long id) {
-        bookRepository.deleteById(id);
+    public boolean deleteBookById(long id) {
+        // Check if the book exists
+        if (bookRepository.existsById(id)) {
+            // Delete the book
+            bookRepository.deleteById(id);
+            return true; // Indicate that the deletion was successful
+        }
+        return false;
     }
 
     @Override
